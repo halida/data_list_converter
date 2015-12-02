@@ -1,5 +1,5 @@
-require 'spreadsheet' rescue nil
-require 'csv' rescue nil
+# require 'spreadsheet'
+# require 'csv'
 
 # record data have many representation formats:
 #
@@ -11,7 +11,7 @@ require 'csv' rescue nil
 # this class is used for convert data between those types,
 # so we can use it to easily export and import data.
 # 
-class ListDataConverter
+class DataListConverter
   TYPES = [:item_iterator, :table_iterator,
            :item_data, :table_data, :records,
            :csv_file, :xls_file,
@@ -29,8 +29,8 @@ class ListDataConverter
   begin
     # Example:
     # convert(:item_iterator, :item_data, iter)
-    # convert(:item_iterator, :csv_file, iter, filename: 'result.csv')
-    # convert(:item_iterator, :table_data, iter, filter: {table_iterator: :remove_debug})
+    # convert(:item_iterator, :csv_file, iter, csv_file: {filename: 'result.csv'})
+    # convert(:item_iterator, :table_data, iter, table_iterator: {filter: :remove_debug})
     def convert(from_type, to_type, from_value, options={})
       route = find_route(from_type, to_type)
 
@@ -74,7 +74,9 @@ class ListDataConverter
         return out + [node] if node == end_node
         next unless next_nodes = map[node]
 
-        result = find_next_node(out + [node], next_nodes, map.except(node), end_node)
+        new_map = map.dup
+        new_map.delete(node)
+        result = find_next_node(out + [node], next_nodes, new_map, end_node)
         return result if result
       end
       return nil
@@ -90,7 +92,7 @@ class ListDataConverter
         map = {}
         routes.each do |item|
           map[item.first] ||= []
-          map[item.first] += [item.second]
+          map[item.first] += [item[1]]
         end
         map
       end
@@ -105,7 +107,7 @@ class ListDataConverter
       lambda { |&block|
         records.find_each do |record|
           item = columns.map do |column|
-            [column.first.to_sym, record.send(column.second)]
+            [column.first.to_sym, record.send(column[1])]
           end.to_h
           block.call(item)
         end
@@ -252,3 +254,4 @@ class ListDataConverter
 
   end
 end
+
