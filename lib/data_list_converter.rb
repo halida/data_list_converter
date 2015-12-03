@@ -1,5 +1,5 @@
 # require 'spreadsheet'
-# require 'csv'
+require 'csv'
 
 # record data have many representation formats:
 #
@@ -30,30 +30,49 @@ class DataListConverter
     # Example:
     # convert(:item_iterator, :item_data, iter)
     # convert(:item_iterator, :csv_file, iter, csv_file: {filename: 'result.csv'})
-    # convert(:item_iterator, :table_data, iter, table_iterator: {filter: :remove_debug})
+    # convert(:csv_file, :item_data, {filename: 'result.csv'})
+    #
+    # can add filter:
+    # filter = :limit
+    # filter = {limit: {size: 2}}
+    # filter = [{limit: {size: 12}}, {count: {size: 4}}]
+    # convert(:item_iterator, :table_data, iter, table_iterator: {filter: filter})
     def convert(from_type, to_type, from_value, options={})
       route = find_route(from_type, to_type)
 
-      filter_functions_for = lambda { |type|
-        if filters = options[:filter] and filters = filters[type]
-          [filters].flatten.map{|f| [type, "_", f].join}
+      methods = []
+      add_filter = lambda { |type|
+        filter_methods = (options[type] || {}).delete(:filter)
+        return unless filter_methods
+        # filter: :debug
+        filter_methods = [filter_methods] unless filter_methods.kind_of?(Array)
+        filter_methods = filter_methods.map do |v|
+          # fix filter arguments
+          case v
+          # {:limit, {count: 12}} => [:limit, {count: 12}]
+          when Hash; v.first
+          # :debug => [:debug, nil]
+          when Symbol, String; [v, {}]
+          else; v
+          end
+        end.map do |v|
+          # fix filter names: limit => item_iterator_limit
+          name, args = v
+          ["#{type}_#{name}", args]
         end
+        methods += filter_methods
       }
+      add_filter.call(route[0])
 
-      methods = (0..(route.length-2)).map do |i|
+      (0..(route.length-2)).map do |i|
         from_type, to_type = route[i], route[i+1]
-        [
-          (filter_functions_for.call(from_type) if i == 0), # add first type filter
-          "#{from_type}_to_#{to_type}",
-          filter_functions_for.call(to_type),
-        ].flatten.compact
-      end.flatten
-      chain_convert(methods, from_value, options)
-    end
+        methods.push(["#{from_type}_to_#{to_type}", options[to_type]])
+        add_filter.call(to_type)
+      end
 
-    def chain_convert(methods, from_value, options)
-      methods.inject(from_value) do |v, method_name|
-        self.method(method_name).call(v, options)
+      methods.inject(from_value) do |v, method|
+        method_name, args = method
+        self.method(method_name).call(v, args)
       end
     end
 
@@ -159,10 +178,10 @@ class DataListConverter
     alias_method :item_data_to_item_iterator, :data_to_iterator
     alias_method :table_data_to_table_iterator, :data_to_iterator
 
-    def xls_file_to_table_iterator(proc, options)
+    def xls_file_to_table_iterator(input, options)
       lambda { |&block|
-        book = Spreadsheet.open(options[:filename])
-        sheet = book.worksheet 0
+        book = Spreadsheet.open(input[:filename])
+        sheet = book.worksheet input[:sheet] || 0
         sheet.each do |row|
           block.call(row.to_a)
         end
@@ -181,9 +200,9 @@ class DataListConverter
       book.write(options[:filename])
     end
 
-    def csv_file_to_table_iterator(proc, options)
+    def csv_file_to_table_iterator(input, options)
       lambda { |&block|
-        CSV.open(options[:filename]) do |csv|
+        CSV.open(input[:filename]) do |csv|
           csv.each do |row|
             block.call(row)
           end
@@ -217,8 +236,8 @@ class DataListConverter
       }
     end
 
-    def item_iterator_limit_size(proc, opt={})
-      limit_size = opt[:limit] || 10
+    def item_iterator_limit(proc, options)
+      limit_size = options[:size] || 10
       lambda { |&block|
         limit = 0
         proc.call do |item|
@@ -228,7 +247,21 @@ class DataListConverter
         end
       }
     end
+    alias_method :table_iterator_limit, :item_iterator_limit
 
+    def item_iterator_count(proc, options)
+      count = 0
+      size = options[:size] || 100
+      msg = options[:msg] || "on %{count}"
+      out = options[:out] || STDOUT
+      lambda { |&block|
+        proc.call do |item|
+          block.call(item)
+          count += 1
+          out.write(msg % {count: count} + "\n") if count % size == 0
+        end
+      }
+    end
   end    
 
   begin # helper functions
