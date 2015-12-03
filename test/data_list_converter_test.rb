@@ -24,7 +24,7 @@ describe DataListConverter do
   describe :type do
     it 'works' do
       DataListConverter.types.must_equal(
-        [:csv_file, :item_data, :item_iterator,
+        [:csv_file, :item_data, :item_iterator, :multi_sheet_data, :multi_sheet_iterator,
          :records, :table_data, :table_iterator, :xls_file])
     end
   end
@@ -70,13 +70,49 @@ describe DataListConverter do
       string.string.must_equal ".4\n.8\n.12\n"
     end
 
-    it 'has type xls file' do
+    it 'has type xls_file' do
       begin
         @c.convert(:item_data, :xls_file, ITEM_DATA, xls_file: {filename: "test.xls"})
         @c.convert(:xls_file, :item_data, {filename: "test.xls"}).must_equal ITEM_DATA
+
+        multi_sheet = {
+          "sheet1" => [['name'], ['james'], ['bob']],
+          "sheet2" => [['value'], ['21'], ['12']],
+        }
+        @c.convert(:multi_sheet_data, :xls_file, multi_sheet, xls_file: {filename: 'test.xls'})
+        @c.convert(:xls_file, :multi_sheet_data, {filename: 'test.xls'}).must_equal multi_sheet
       ensure
         FileUtils.rm_f("test.xls")
       end
+    end
+  end
+
+  describe :filters do
+    it 'limit iterator' do
+      filter = {limit: {size: 2}}
+      item_data = [{name: "james"}] * 10
+      result = DataListConverter.convert(
+        :item_data, :table_data, item_data,
+        item_iterator: {filter: filter})
+      result.must_equal [["name"], ["james"], ["james"]]
+    end
+
+    it 'count item_iterator' do
+      iter = lambda { |&block|
+        total = 10000
+        block.call(total: total)
+        (1..total-1).each do |i|
+          block.call(id: i, value: i*i)
+        end
+      }
+      string = StringIO.new
+      filter = {count: {size: 4000,
+                        out: string,
+                        msg: "%{percent}%"}}
+      result = DataListConverter.convert(
+        :item_iterator, :table_data, iter,
+        item_iterator: {filter: filter})
+      string.string.split("\n").must_equal ['total: 10000', '40.0%', '80.0%']
     end
   end
 end

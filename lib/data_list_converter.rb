@@ -7,20 +7,22 @@ class DataListConverter
   CONVERTERS = {}
   FILTERS = {}
 
-  def self.types
-    CONVERTERS.keys.flatten.uniq.sort
-  end
-
-  def self.register_converter(from_type, to_type, method)
-    CONVERTERS[[from_type, to_type]] = method
-  end
-
-  def self.register_filter(type, name, method)
-    FILTERS[type] ||= {}
-    FILTERS[type][name] = method
-  end
-
   class << self
+
+    def types
+      CONVERTERS.keys.flatten.uniq.sort
+    end
+
+    def register_converter(from_type, to_type, method)
+      @route_map = nil # clear cache
+      CONVERTERS[[from_type, to_type]] = method
+    end
+
+    def register_filter(type, name, method)
+      FILTERS[type] ||= {}
+      FILTERS[type][name] = method
+    end
+
     # Example:
     # convert(:item_iterator, :item_data, iter)
     # convert(:item_iterator, :csv_file, iter, csv_file: {filename: 'result.csv'})
@@ -32,44 +34,45 @@ class DataListConverter
     # filter = [{limit: {size: 12}}, {count: {size: 4}}]
     # convert(:item_iterator, :table_data, iter, table_iterator: {filter: filter})
     def convert(from_type, to_type, from_value, options={})
-      route = find_route(from_type, to_type)
-
       methods = []
       add_filter = lambda { |type|
-        filter_methods = (options[type] || {}).delete(:filter)
-        return unless filter_methods
-        # filter: :debug
-        filter_methods = [filter_methods] unless filter_methods.kind_of?(Array)
-        filter_methods = filter_methods.map do |v|
-          # fix filter arguments
-          case v
-          # {:limit, {count: 12}} => [:limit, {count: 12}]
-          when Hash; v.first
-          # :debug => [:debug, nil]
-          when Symbol, String; [v, {}]
-          else; v
-          end
-        end.map do |v|
-          # fix filter names: limit => item_iterator_limit
-          name, args = v
-          method = FILTERS[type][name] rescue raise("cannot find method for type #{type} filter #{name}")
-          [method, args]
-        end
-        methods += filter_methods
+        filters = (options[type] || {}).delete(:filter)
+        return unless filters
+        methods += normalize_filters(type, filters)
       }
+
+      route = find_route(from_type, to_type)
       add_filter.call(route[0])
 
       (0..(route.length-2)).map do |i|
         from_type, to_type = route[i], route[i+1]
         method = CONVERTERS[[from_type, to_type]]
-        raise "cannot find method for #{from_type} to #{to_type}" unless method
-        methods.push([method, options[to_type]])
+        raise "cannot find converter #{from_type} -> #{to_type}" unless method
+        methods.push([method, options[to_type] || {}])
         add_filter.call(to_type)
       end
 
       methods.inject(from_value) do |v, method|
         method, args = method
         method.call(v, args)
+      end
+    end
+
+    def normalize_filters(type, filters)
+      # filter list as array
+      filters = [filters] unless filters.kind_of?(Array)
+      filters.map do |v|
+        # fix filter arguments
+        case v
+        # {:limit, {count: 12}} => [:limit, {count: 12}]
+        when Hash; v.first
+        # :debug => [:debug, {}]
+        when Symbol, String; [v, {}]
+        else; v
+        end
+      end.map do |name, args|
+        method = FILTERS[type][name] rescue raise("cannot find method for type #{type} filter #{name}")
+        [method, args]
       end
     end
 
@@ -95,7 +98,7 @@ class DataListConverter
         result = find_next_node(out + [node], next_nodes, new_map, end_node)
         return result if result
       end
-      return nil
+      nil
     end
     private :find_next_node
 
@@ -103,42 +106,16 @@ class DataListConverter
     def route_map
       @route_map ||= \
       begin
-        routes = CONVERTERS.keys.dup
-        map = {}
-        routes.each do |item|
+        CONVERTERS.keys.
+          inject({}) do |map, item|
           map[item.first] ||= []
           map[item.first] += [item[1]]
+          map
         end
-        map
       end
     end
 
   end
-
-
-  class << self # helper functions
-
-    def data_to_sheets_xls(data, filename)
-      book = Spreadsheet::Workbook.new
-      data.each do |k, v|
-        sheet = book.create_worksheet name: k
-        v.each_with_index do |d, i|
-          sheet.row(i).concat d
-        end
-      end
-      book.write(filename)
-      filename
-    end
-
-    def sheets_xls_to_data(filename)
-      book = Spreadsheet.open(filename)
-      book.worksheets.map do |sheet|
-        [sheet.name, sheet.map{|row| row.to_a}]
-      end.to_h
-    end
-
-  end
-
 end
 
 # register types
@@ -237,6 +214,10 @@ class DataListConverter
 end
 
 # xls_file only works when installed spreadsheet gem
+# multi_sheet_data = {
+#   'sheet1' => [columns, row, row, ...],
+#   'sheet2' => [columns, row, row, ...],
+# }
 begin
   require 'spreadsheet'
 
@@ -262,6 +243,48 @@ begin
         end
         book.write(options[:filename])
         options[:filename]
+      })
+
+    self.register_converter(
+      :multi_sheet_iterator, :multi_sheet_data, lambda { |data, options|
+        data.map do |k, iter|
+          data = self.convert(:table_iterator, :table_data, iter)
+          [k, data]
+        end.to_h
+      })
+    self.register_converter(
+      :multi_sheet_data, :multi_sheet_iterator, lambda { |data, options|
+        data.map do |k, v|
+          iter = self.convert(:table_data, :table_iterator, v)
+          [k, iter]
+        end.to_h
+    })
+    self.register_converter(
+      :multi_sheet_iterator, :xls_file, lambda { |data, options|
+        book = Spreadsheet::Workbook.new
+        data.each do |name, table_iterator|
+          sheet = book.create_worksheet(name: name)
+          i = 0
+          table_iterator.call do |row|
+            sheet.row(i).concat(row)
+            i += 1
+          end
+        end
+        filename = options[:filename]
+        book.write(filename)
+        filename
+      })
+    self.register_converter(
+      :xls_file, :multi_sheet_iterator, lambda { |data, options|
+        book = Spreadsheet.open(data[:filename])
+        book.worksheets.map do |sheet|
+          iterator = lambda { |&block|
+            sheet.each do |row| 
+              block.call(row.to_a)
+            end
+          }
+          [sheet.name, iterator]
+        end.to_h
       })
   end
 rescue LoadError
@@ -306,13 +329,22 @@ class DataListConverter
     :item_iterator, :count, lambda{ |proc, options|
       count = 0
       size = options[:size] || 100
-      msg = options[:msg] || "on %{count}"
+      msg_format = options[:msg] || "on %{count}"
+      total_format = options[:total] || "total: %{total}"
       out = options[:out] || STDOUT
+      total = 1
       lambda { |&block|
         proc.call do |item|
-          block.call(item)
-          count += 1
-          out.write(msg % {count: count} + "\n") if count % size == 0
+          if item.keys == [:total]
+            total = item[:total]
+            out.write(total_format % {total: total})
+            out.write("\n")
+          else
+            block.call(item)
+            count += 1
+            msg = msg_format % {count: count, percent: (count / total.to_f * 100).round(2)}
+            out.write(msg + "\n") if count % size == 0
+          end
         end
       }
     })
