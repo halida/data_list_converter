@@ -21,9 +21,17 @@ CSV_DATA = %{
 }.strip
 
 describe DataListConverter do
+  describe :type do
+    it 'works' do
+      DataListConverter.types.must_equal(
+        [:csv_file, :item_data, :item_iterator,
+         :records, :table_data, :table_iterator, :xls_file])
+    end
+  end
+
   describe :convert do
     before :all do
-      @c = DataListConverter.new
+      @c = DataListConverter
     end
     
     it 'works' do
@@ -60,6 +68,15 @@ describe DataListConverter do
                           item_iterator: {filter: filter})
       result.must_equal([["name"]] + [["james"]]*12)
       string.string.must_equal ".4\n.8\n.12\n"
+    end
+
+    it 'has type xls file' do
+      begin
+        @c.convert(:item_data, :xls_file, ITEM_DATA, xls_file: {filename: "test.xls"})
+        @c.convert(:xls_file, :item_data, {filename: "test.xls"}).must_equal ITEM_DATA
+      ensure
+        FileUtils.rm_f("test.xls")
+      end
     end
   end
 end
