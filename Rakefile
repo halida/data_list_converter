@@ -9,4 +9,10 @@ task :test do
   load 'test/data_list_converter_test.rb'
 end
 
+task :build do
+  sh 'gem build data_list_converter.gemspec'
+end
 
+task :upload do
+  sh 'gem push *.gem'
+end
