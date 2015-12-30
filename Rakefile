@@ -16,6 +16,7 @@ task :test do
 end
 
 task :build do
+  sh 'rm -f *.gem'
   sh 'gem build data_list_converter.gemspec'
 end
 
