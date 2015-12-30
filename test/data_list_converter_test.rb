@@ -25,7 +25,7 @@ describe DataListConverter do
     it 'works' do
       DataListConverter.types.must_equal(
         [:csv_file, :item_data, :item_iterator, :multi_sheet_data, :multi_sheet_iterator,
-         :records, :table_data, :table_iterator, :xls_file])
+         :records, :table_data, :table_iterator, :xls_file, :xlsx_file])
     end
   end
 
@@ -83,6 +83,22 @@ describe DataListConverter do
         @c.convert(:xls_file, :multi_sheet_data, {filename: 'test.xls'}).must_equal multi_sheet
       ensure
         FileUtils.rm_f("test.xls")
+      end
+    end
+
+    it 'has type xlsx_file' do
+      begin
+        @c.convert(:item_data, :xlsx_file, ITEM_DATA, xlsx_file: {filename: "test.xlsx"})
+        @c.convert(:xlsx_file, :item_data, {filename: "test.xlsx"}).must_equal ITEM_DATA
+
+        multi_sheet = {
+          "sheet1" => [['name'], ['james'], ['bob']],
+          "sheet2" => [['value'], ['21'], ['12']],
+        }
+        @c.convert(:multi_sheet_data, :xlsx_file, multi_sheet, xlsx_file: {filename: 'test.xlsx'})
+        @c.convert(:xlsx_file, :multi_sheet_data, {filename: 'test.xlsx'}).must_equal multi_sheet
+      ensure
+        FileUtils.rm_f("test.xlsx")
       end
     end
   end

@@ -7,6 +7,20 @@ class DataListConverter
 
   class << self
 
+    attr_accessor :debug
+
+    def on_debug
+      self.debug = true
+      yield
+    ensure
+      self.debug = false
+    end
+
+    def log(msg)
+      return unless debug
+      puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\t#{msg}"
+    end
+
     def types
       CONVERTERS.keys.flatten.uniq.sort
     end
@@ -42,6 +56,7 @@ class DataListConverter
       route = find_route(from_type, to_type)
       add_filter.call(route[0])
 
+      self.log("route: #{route}")
       (0..(route.length-2)).map do |i|
         from_type, to_type = route[i], route[i+1]
         method = CONVERTERS[[from_type, to_type]]
@@ -50,6 +65,7 @@ class DataListConverter
         add_filter.call(to_type)
       end
 
+      self.log("methods: #{methods}")
       methods.inject(from_value) do |v, method|
         method, args = method
         method.call(v, args)
@@ -80,25 +96,40 @@ class DataListConverter
     # we need find all the intermidate data type, like: [:item_data, :item_iterator, :table_iterator, :csv_file]
     def find_route(from_type, to_type)
       raise Exception, "from_type should not equal to to_type: #{from_type}" if from_type == to_type
-      out = find_next_node([], [from_type], route_map, to_type)
-      raise Exception, "Route not found: #{from_type} -> #{to_type}" unless out
-      out
-    end
+      # map wide search
+      checked = Set.new
+      checking = Set.new([from_type])
+      directions = {}
 
-    # iterate through the type convert graph, and find the route
-    def find_next_node (out, nodes, map, end_node)
-      nodes.each do |node|
-        return out + [node] if node == end_node
-        next unless next_nodes = map[node]
+      while not checking.empty?
+        current_node = checking.first
 
-        new_map = map.dup
-        new_map.delete(node)
-        result = find_next_node(out + [node], next_nodes, new_map, end_node)
-        return result if result
+        next_nodes = route_map[current_node]
+        # mark direction from from_type
+        next_nodes.each do |node|
+          # first marked is the shortest
+          directions[node] ||= current_node
+        end
+
+        if next_nodes.include?(to_type)
+          # get route
+          start = to_type
+          route = [start]
+          while start != from_type
+            previous = directions[start]
+            raise "cannot find previous for #{start} in #{directions}" if not previous
+            route.push(previous)
+            start = previous
+          end
+          return route.reverse
+        else
+          checking.delete(current_node)
+          checked.add(current_node)
+          checking += Set.new(next_nodes) - checked
+        end
       end
-      nil
+      raise Exception, "Route not found: #{from_type} -> #{to_type}"
     end
-    private :find_next_node
 
     # convert adjacency list into quick lookup hash
     def route_map

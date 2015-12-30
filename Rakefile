@@ -5,6 +5,12 @@ Bundler::GemHelper.install_tasks
 
 task :default => :test
 
+task :console do
+  require 'pry'
+  require 'data_list_converter'
+  Pry.start
+end
+
 task :test do
   load 'test/data_list_converter_test.rb'
 end
