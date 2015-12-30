@@ -22,7 +22,7 @@ class DataListConverter
         columns = nil
         proc.call do |row|
           unless columns
-            columns = row.map(&:to_sym)
+            columns = row.map{|c| (c || "").to_sym}
           else
             block.call(columns.zip(row).to_h)
           end
