@@ -25,7 +25,7 @@ class DataListConverter
     options[:filename]
   end
 
-  self.register_converter(:multi_sheet_iterator, :xls_file) do |data, options|
+  self.register_converter(:multi_sheet_table_iterator, :xls_file) do |data, options|
     book = Spreadsheet::Workbook.new
     data.each do |name, table_iterator|
       sheet = book.create_worksheet(name: name)
@@ -40,7 +40,7 @@ class DataListConverter
     filename
   end
 
-  self.register_converter(:xls_file, :multi_sheet_iterator) do |data, options|
+  self.register_converter(:xls_file, :multi_sheet_table_iterator) do |data, options|
     book = Spreadsheet.open(data[:filename])
     book.worksheets.map do |sheet|
       iterator = lambda { |&block|

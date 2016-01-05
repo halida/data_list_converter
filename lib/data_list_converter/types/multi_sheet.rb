@@ -1,23 +1,29 @@
-# multi_sheet_data = {
+# multi_sheet_table_data = {
 #   'sheet1' => [columns, row, row, ...],
 #   'sheet2' => [columns, row, row, ...],
 # }
+# also:
+# multi_sheet_item_data
+# multi_sheet_table_iterator
+# multi_sheet_item_iterator
+
 class DataListConverter
 
-  self.register_converter(:multi_sheet_iterator, :multi_sheet_data) do |data, options|
-    options[:type] ||= :item_data
-    data.map do |k, iter|
-      data = self.convert(:table_iterator, options[:type], iter)
-      [k, data]
-    end.to_h
-  end
-
-  self.register_converter(:multi_sheet_data, :multi_sheet_iterator) do |data, options|
-    options[:type] ||= :table_data
-    data.map do |k, v|
-      iter = self.convert(options[:type], :table_iterator, v)
-      [k, iter]
-    end.to_h
+  MULT_SHEET_CONVERTS = [[:table_data, :table_iterator],
+                         [:item_data, :item_iterator],
+                         [:table_iterator, :item_iterator],
+                        ]
+  (MULT_SHEET_CONVERTS + MULT_SHEET_CONVERTS.map(&:reverse)).each do |i|
+    from_type, to_type = i
+    self.register_converter(
+      :"multi_sheet_#{from_type}",
+      :"multi_sheet_#{to_type}",
+    ) do |data, options|
+      data.map do |sheet, from_data|
+        to_data = self.convert(from_type, to_type, from_data)
+        [sheet, to_data]
+      end.to_h
+    end
   end
 
 end

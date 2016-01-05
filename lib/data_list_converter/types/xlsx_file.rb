@@ -29,7 +29,7 @@ class DataListConverter
     filename
   end
 
-  self.register_converter(:multi_sheet_iterator, :xlsx_file) do |data, options|
+  self.register_converter(:multi_sheet_table_iterator, :xlsx_file) do |data, options|
     book = RubyXL::Workbook.new
     book.worksheets.pop
     data.each do |name, table_iterator|
@@ -47,7 +47,7 @@ class DataListConverter
     filename
   end
 
-  self.register_converter(:xlsx_file, :multi_sheet_iterator) do |data, options|
+  self.register_converter(:xlsx_file, :multi_sheet_table_iterator) do |data, options|
     book = RubyXL::Parser.parse(data[:filename])
     book.worksheets.map do |sheet|
       iterator = lambda { |&block|

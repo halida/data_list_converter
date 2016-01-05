@@ -12,6 +12,12 @@ task :console do
 end
 
 task :test do
+  require 'minitest/pride'
+  require 'minitest/autorun'
+  require 'data_list_converter'
+
+  load 'test/testdata.rb'
+
   Dir['test/*_test.rb'].each do |file|
     load file
   end
