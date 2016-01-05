@@ -2,7 +2,7 @@ $:.push File.expand_path("../lib", __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = "data_list_converter"
-  s.version     = "0.2.1"
+  s.version     = "0.3.0"
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["linjunhalida"]
   s.email       = ["linjunhalida@gmail.com"]
