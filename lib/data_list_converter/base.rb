@@ -25,14 +25,14 @@ class DataListConverter
       CONVERTERS.keys.flatten.uniq.sort
     end
 
-    def register_converter(from_type, to_type, method)
+    def register_converter(from_type, to_type, &block)
       @route_map = nil # clear cache
-      CONVERTERS[[from_type, to_type]] = method
+      CONVERTERS[[from_type, to_type]] = block
     end
 
-    def register_filter(type, name, method)
+    def register_filter(type, name, &block)
       FILTERS[type] ||= {}
-      FILTERS[type][name] = method
+      FILTERS[type][name] = block
     end
 
     # Example:

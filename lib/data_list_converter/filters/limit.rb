@@ -10,8 +10,7 @@ class DataListConverter
       end
     }
   end
-  self.register_filter(
-    :item_iterator, :limit, self.method(:iterator_limit))
-  self.register_filter(
-    :table_iterator, :limit, self.method(:iterator_limit))
+
+  self.register_filter(:item_iterator, :limit, &self.method(:iterator_limit))
+  self.register_filter(:table_iterator, :limit, &self.method(:iterator_limit))
 end

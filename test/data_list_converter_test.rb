@@ -3,22 +3,7 @@ require 'minitest/autorun'
 
 require 'data_list_converter'
 
-ITEM_DATA = [
-  {name: "James", score: '12'},
-  {name: "Bob", score: '33'},
-]
-
-TABLE_DATA = [
-  ['name', 'score'],
-  ['James', '12'],
-  ['Bob', '33']
-]
-
-CSV_DATA = %{
-"name","score"
-"James","12"
-"Bob","33"
-}.strip
+load 'test/testdata.rb'
 
 describe DataListConverter do
   describe :type do
@@ -80,7 +65,10 @@ describe DataListConverter do
           "sheet2" => [['value'], ['21'], ['12']],
         }
         @c.convert(:multi_sheet_data, :xls_file, multi_sheet, xls_file: {filename: 'test.xls'})
-        @c.convert(:xls_file, :multi_sheet_data, {filename: 'test.xls'}).must_equal multi_sheet
+        @c.convert(:xls_file, :multi_sheet_data,
+                   {filename: 'test.xls'},
+                   multi_sheet_data: {type: :table_data},
+                  ).must_equal multi_sheet
       ensure
         FileUtils.rm_f("test.xls")
       end
@@ -96,7 +84,10 @@ describe DataListConverter do
           "sheet2" => [['value'], ['21'], ['12']],
         }
         @c.convert(:multi_sheet_data, :xlsx_file, multi_sheet, xlsx_file: {filename: 'test.xlsx'})
-        @c.convert(:xlsx_file, :multi_sheet_data, {filename: 'test.xlsx'}).must_equal multi_sheet
+        @c.convert(:xlsx_file, :multi_sheet_data,
+                   {filename: 'test.xlsx'},
+                   multi_sheet_data: {type: :table_data},
+                  ).must_equal multi_sheet
       ensure
         FileUtils.rm_f("test.xlsx")
       end

@@ -12,7 +12,9 @@ task :console do
 end
 
 task :test do
-  load 'test/data_list_converter_test.rb'
+  Dir['test/*_test.rb'].each do |file|
+    load file
+  end
 end
 
 task :build do
