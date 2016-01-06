@@ -28,7 +28,7 @@ class DataListConverter
   self.register_converter(:multi_sheet_table_iterator, :xls_file) do |data, options|
     book = Spreadsheet::Workbook.new
     data.each do |name, table_iterator|
-      sheet = book.create_worksheet(name: name)
+      sheet = book.create_worksheet(name: name.to_s)
       i = 0
       table_iterator.call do |row|
         sheet.row(i).concat(row)
@@ -48,7 +48,7 @@ class DataListConverter
           block.call(row.to_a)
         end
       }
-      [sheet.name, iterator]
+      [sheet.name.to_sym, iterator]
     end.to_h
   end
 end

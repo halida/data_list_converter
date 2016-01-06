@@ -17,11 +17,11 @@ CSV_DATA = %{
 
 
 MULTI_SHEET_TABLE_DATA = {
-  "sheet1" => [['name'], ['james'], ['bob']],
-  "sheet2" => [['value'], ['21'], ['12']],
+  sheet1: [['name'], ['james'], ['bob']],
+  sheet2: [['value'], ['21'], ['12']],
 }
 
 MULTI_SHEET_ITEM_DATA = {
-  "sheet1" => [{name: "james"}, {name: "bob"}],
-  "sheet2" => [{value: "21"}, {value: "12"}],
+  sheet1: [{name: "james"}, {name: "bob"}],
+  sheet2: [{value: "21"}, {value: "12"}],
 }

@@ -33,7 +33,7 @@ class DataListConverter
     book = RubyXL::Workbook.new
     book.worksheets.pop
     data.each do |name, table_iterator|
-      sheet = book.add_worksheet(name)
+      sheet = book.add_worksheet(name.to_s)
       i = 0
       table_iterator.call do |row|
         row.each_with_index do |v, j|
@@ -55,7 +55,7 @@ class DataListConverter
           block.call(row.cells.map(&:value))
         end
       }
-      [sheet.sheet_name, iterator]
+      [sheet.sheet_name.to_sym, iterator]
     end.to_h
   end
 end
