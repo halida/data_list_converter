@@ -52,6 +52,7 @@ describe DataListConverter do
         FileUtils.rm_f("test.xls")
       end
     end
+
   end
 
   describe :xlsx_file do
@@ -70,5 +71,19 @@ describe DataListConverter do
       end
     end
 
+    it 'custom cell format' do
+      begin
+        data = {
+          a: [['name'],
+              [{text: 'bbb', change_font_color: '008800', change_font_size: 20}],
+              [{text: 'aaa', change_fill: '880000'}],
+             ],
+        }
+        @c.convert(:multi_sheet_table_data, :xlsx_file, data,
+                   xlsx_file: {filename: 'test.xlsx'})
+      ensure
+        FileUtils.rm_f("test.xlsx")
+      end
+    end
   end
 end

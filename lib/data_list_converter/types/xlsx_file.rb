@@ -37,7 +37,18 @@ class DataListConverter
       i = 0
       table_iterator.call do |row|
         row.each_with_index do |v, j|
-          sheet.add_cell(i, j, v)
+          if v.kind_of?(Hash)
+            # custom cell format
+            cell = sheet.add_cell(i, j, v[:text])
+            v.each do |k, v|
+              next if k == :text
+              cell.send(k, v)
+            end
+            cell.change_fill(v[:fill_color]) if v[:fill_color]
+          else
+            cell = sheet.add_cell(i, j, v)
+          end
+
         end
         i += 1
       end
