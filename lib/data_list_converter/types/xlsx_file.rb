@@ -63,6 +63,7 @@ class DataListConverter
     book.worksheets.map do |sheet|
       iterator = lambda { |&block|
         sheet.each do |row|
+          next unless row
           block.call(row.cells.map(&:value))
         end
       }
