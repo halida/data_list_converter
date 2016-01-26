@@ -1,3 +1,7 @@
+require 'data_list_converter/types/csv_file'
+require 'data_list_converter/types/xls_file'
+require 'data_list_converter/types/xlsx_file'
+
 describe DataListConverter do
   before :all do
     @c = DataListConverter
