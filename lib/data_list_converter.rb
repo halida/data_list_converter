@@ -1,4 +1,5 @@
 require 'data_list_converter/base'
+require 'data_list_converter/version'
 
 require 'data_list_converter/types/basic'
 require 'data_list_converter/types/csv_file'

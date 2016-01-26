@@ -1,8 +1,9 @@
 $:.push File.expand_path("../lib", __FILE__)
+require "data_list_converter/version"
 
 Gem::Specification.new do |s|
   s.name        = "data_list_converter"
-  s.version     = "0.3.2"
+  s.version     = DataListConverter::VERSION.dup
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["linjunhalida"]
   s.email       = ["linjunhalida@gmail.com"]
