@@ -8,7 +8,9 @@ class DataListConverter
       book = RubyXL::Parser.parse(input[:filename])
       sheet = book.worksheets[input[:sheet] || 0]
       sheet.each do |row|
-        block.call(row.cells.map(&:value))
+        next unless row
+        row_data = row.cells.map{|i| i.try(:value)}
+        block.call(row_data)
       end
     }
   end
@@ -64,7 +66,8 @@ class DataListConverter
       iterator = lambda { |&block|
         sheet.each do |row|
           next unless row
-          block.call(row.cells.map(&:value))
+          row_data = row.cells.map{|i| i.try(:value)}
+          block.call(row_data)
         end
       }
       [sheet.sheet_name.to_sym, iterator]

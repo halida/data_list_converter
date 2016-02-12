@@ -94,3 +94,11 @@ DataListConverter.register_filter(:item_iterator, :limit) do |proc, options|
   }
 end
 ```
+
+
+## Todo
+
+- register can bind method again
+- better API
+- better error message
+- load file/save file with auto format by extname
