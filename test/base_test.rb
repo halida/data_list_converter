@@ -11,7 +11,7 @@ describe DataListConverter do
     it 'has parameters' do
       begin
         @c.convert(:item_data, :csv_file, ITEM_DATA, csv_file: {filename: "test.csv"})
-        File.read("test.csv").strip.must_equal CSV_DATA
+        File.read("test.csv").must_equal CSV_DATA
         @c.convert(:csv_file, :item_data, {filename: "test.csv"}).must_equal(ITEM_DATA)
       ensure
         FileUtils.rm_f("test.csv")

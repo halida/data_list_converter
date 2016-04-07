@@ -9,12 +9,11 @@ TABLE_DATA = [
   ['Bob', '33']
 ]
 
-CSV_DATA = %{
+CSV_DATA = <<-EOF
 "name","score"
 "James","12"
 "Bob","33"
-}.strip
-
+EOF
 
 MULTI_SHEET_TABLE_DATA = {
   sheet1: [['name'], ['james'], ['bob']],

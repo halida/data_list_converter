@@ -16,7 +16,7 @@ describe DataListConverter do
          :multi_sheet_table_data,
          :multi_sheet_item_iterator,
          :multi_sheet_table_iterator,
-         :csv_file, :xls_file, :xlsx_file,
+         :csv_file, :csv_raw, :xls_file, :xlsx_file,
          :records,
         ].sort
       )
@@ -35,6 +35,8 @@ describe DataListConverter do
       begin
         @c.convert(:item_data, :csv_file, ITEM_DATA, csv_file: {filename: "test.csv"})
         @c.convert(:csv_file, :item_data, {filename: "test.csv"}).must_equal ITEM_DATA
+        @c.convert(:item_data, :csv_raw, ITEM_DATA).must_equal CSV_DATA
+        @c.convert(:csv_raw, :item_data, CSV_DATA).must_equal ITEM_DATA
       ensure
         FileUtils.rm_f("test.csv")
       end
