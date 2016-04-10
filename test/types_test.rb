@@ -1,26 +1,11 @@
 require 'data_list_converter/types/csv_file'
 require 'data_list_converter/types/xls_file'
 require 'data_list_converter/types/xlsx_file'
+require 'data_list_converter/types/marshal'
 
 describe DataListConverter do
   before :all do
     @c = DataListConverter
-  end
-
-  describe :type do
-    specify do
-      DataListConverter.types.must_equal(
-        [:item_data, :item_iterator,
-         :table_data, :table_iterator,
-         :multi_sheet_item_data,
-         :multi_sheet_table_data,
-         :multi_sheet_item_iterator,
-         :multi_sheet_table_iterator,
-         :csv_file, :csv_raw, :xls_file, :xlsx_file,
-         :records,
-        ].sort
-      )
-    end
   end
 
   describe :multi_sheet do
@@ -63,17 +48,18 @@ describe DataListConverter do
 
   describe :xlsx_file do
     specify do
+      filename = 'test.xlsx'
       begin
-        @c.convert(:item_data, :xlsx_file, ITEM_DATA, xlsx_file: {filename: "test.xlsx"})
-        @c.convert(:xlsx_file, :item_data, {filename: "test.xlsx"}).must_equal ITEM_DATA
+        @c.convert(:item_data, :xlsx_file, ITEM_DATA, xlsx_file: {filename: filename})
+        @c.convert(:xlsx_file, :item_data, {filename: filename}).must_equal ITEM_DATA
 
         @c.convert(:multi_sheet_table_data, :xlsx_file, MULTI_SHEET_TABLE_DATA,
-                   xlsx_file: {filename: 'test.xlsx'})
+                   xlsx_file: {filename: filename})
         @c.convert(:xlsx_file, :multi_sheet_table_data,
-                   {filename: 'test.xlsx'},
+                   {filename: filename},
                   ).must_equal(MULTI_SHEET_TABLE_DATA)
       ensure
-        FileUtils.rm_f("test.xlsx")
+        FileUtils.rm_f(filename)
       end
     end
 
@@ -92,4 +78,22 @@ describe DataListConverter do
       end
     end
   end
+
+  describe :marshal do
+    specify do
+      filename = 'test.marshal'
+      begin
+        @c.convert(:item_data, :marshal_file, ITEM_DATA, marshal_file: {filename: filename})
+        @c.convert(:marshal_file, :item_data, {filename: filename}).must_equal ITEM_DATA
+        @c.convert(:multi_sheet_table_data, :marshal_file, MULTI_SHEET_TABLE_DATA,
+                   marshal_file: {filename: filename})
+        @c.convert(:marshal_file, :multi_sheet_table_data,
+                   {filename: filename},
+                  ).must_equal(MULTI_SHEET_TABLE_DATA)
+      ensure
+        FileUtils.rm_f(filename)
+      end
+    end
+  end
+  
 end
