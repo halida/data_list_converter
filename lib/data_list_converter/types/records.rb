@@ -6,7 +6,7 @@ class DataListConverter
     lambda { |&block|
       records.find_each do |record|
         item = columns.map do |column|
-          [column.first.to_sym, record.send(column[1])]
+          [column[0].to_sym, record.send(column[1])]
         end.to_h
         block.call(item)
       end

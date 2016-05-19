@@ -62,4 +62,12 @@ describe DataListConverter do
     end
   end
 
+  describe :unify_item_data_keys do
+    specify do
+      list = [{a: 12}, {b: 11}]
+      @c.unify_item_data_keys(list)
+      list.must_equal([{a: 12, b: nil}, {a: nil, b: 11}])
+    end
+  end
+
 end

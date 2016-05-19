@@ -29,4 +29,21 @@ class DataListConverter
       matcher.match(type)
     end
   end
+
+  # sometimes item data keys don't exactly same, like:
+  #   [{a: 12}, {b: 11}]
+  # should update to:
+  #   [{a: 12, b: nil}, {a: nil, b: 11}]
+  # so it can be convent to table data
+  def self.unify_item_data_keys(list)
+    keys = Set.new
+    list.each do |item|
+      keys += item.keys
+    end
+    list.each do |item|
+      keys.each do |key|
+        item[key] ||= nil
+      end
+    end
+  end
 end
