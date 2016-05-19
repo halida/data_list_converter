@@ -20,7 +20,7 @@ describe DataListConverter do
          :multi_sheet_table_iterator,
          :marshal_file,
          :csv_file, :csv_raw, :xls_file, :xlsx_file,
-         :records,
+         :records, :raw,
         ].sort
       )
     end

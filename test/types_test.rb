@@ -90,6 +90,10 @@ describe DataListConverter do
         @c.convert(:marshal_file, :multi_sheet_table_data,
                    {filename: filename},
                   ).must_equal(MULTI_SHEET_TABLE_DATA)
+
+        data = {a: 12, b: 13}
+        @c.convert(:raw, :marshal_file, data, marshal_file: {filename: filename})
+        @c.convert(:marshal_file, :raw, {filename: filename}).must_equal(data)
       ensure
         FileUtils.rm_f(filename)
       end

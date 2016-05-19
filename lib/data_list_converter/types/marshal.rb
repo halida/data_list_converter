@@ -13,7 +13,7 @@ class DataListConverter
     options[:filename]
   end
 
-  [:table_data, :multi_sheet_table_data].each do |type|
+  [:raw, :table_data, :multi_sheet_table_data].each do |type|
     self.register_converter(:marshal_file, type) do |input, options|
       self.marshal_file_to_data(input, options)
     end
