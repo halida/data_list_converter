@@ -9,7 +9,7 @@ class DataListConverter
       sheet = book.worksheets[input[:sheet] || 0]
       sheet.each do |row|
         next unless row
-        row_data = row.cells.map{|i| i.try(:value)}
+        row_data = row.cells.map{|i| i ? i.value : nil} # i maybe nil
         block.call(row_data)
       end
     }
@@ -66,7 +66,7 @@ class DataListConverter
       iterator = lambda { |&block|
         sheet.each do |row|
           next unless row
-          row_data = row.cells.map{|i| i.try(:value)}
+          row_data = row.cells.map{|i| i ? i.value : nil} # i maybe nil
           block.call(row_data)
         end
       }
