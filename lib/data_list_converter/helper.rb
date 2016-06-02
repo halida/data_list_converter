@@ -73,4 +73,10 @@ class DataListConverter
     end
   end
 
+  def self.parameter(data, key, type)
+    raise Exception, "`#{type}` should be hash, not `#{data.class}`: #{data}" unless data.kind_of?(Hash)
+    raise Exception, "Need `#{key}` for `#{type}`, current: #{data}" if not data.has_key?(key)
+    data.fetch(key)
+  end
+
 end

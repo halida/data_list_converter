@@ -98,8 +98,5 @@ end
 
 ## Todo
 
-- register can bind method again
-- better API
-- better error message
-- load file/save file with auto format by extname
-- report error when cannot find type
+- records testing
+- doc for helpers

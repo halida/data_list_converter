@@ -1,13 +1,15 @@
 class DataListConverter
 
   def self.marshal_file_to_data(input, options=nil)
-    File.open(input[:filename]) do |f|
+    filename = self.parameter(input, :filename, :input)
+    File.open(filename) do |f|
       Marshal.load(f)
     end
   end
 
   def self.marshal_data_to_file(data, options)
-    File.open(options[:filename], 'w+') do |f|
+    filename = self.parameter(options, :filename, :marshal)
+    File.open(filename, 'w+') do |f|
       Marshal.dump(data, f)
     end
     options[:filename]

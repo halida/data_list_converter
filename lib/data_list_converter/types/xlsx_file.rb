@@ -5,7 +5,8 @@ class DataListConverter
 
   self.register_converter(:xlsx_file, :table_iterator) do |input, options|
     lambda { |&block|
-      book = RubyXL::Parser.parse(input[:filename])
+      filename = self.parameter(input, :filename, :input)
+      book = RubyXL::Parser.parse(filename)
       sheet = book.worksheets[input[:sheet] || 0]
       sheet.each do |row|
         next unless row
@@ -26,7 +27,7 @@ class DataListConverter
       end
       i += 1
     end
-    filename = options[:filename]
+    filename = self.parameter(options, :filename, :xlsx_file)
     book.write(filename)
     filename
   end
@@ -55,13 +56,14 @@ class DataListConverter
         i += 1
       end
     end
-    filename = options[:filename]
+    filename = self.parameter(options, :filename, :xlsx_file)
     book.write(filename)
     filename
   end
 
-  self.register_converter(:xlsx_file, :multi_sheet_table_iterator) do |data, options|
-    book = RubyXL::Parser.parse(data[:filename])
+  self.register_converter(:xlsx_file, :multi_sheet_table_iterator) do |input, options|
+    filename = self.parameter(input, :filename, :input)
+    book = RubyXL::Parser.parse(filename)
     book.worksheets.map do |sheet|
       iterator = lambda { |&block|
         sheet.each do |row|

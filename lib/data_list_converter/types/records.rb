@@ -2,7 +2,7 @@
 class DataListConverter
 
   self.register_converter(:records, :item_iterator) do |records, options|
-    columns = options[:columns]
+    columns = self.parameter(options, :columns, :records)
     lambda { |&block|
       records.find_each do |record|
         item = columns.map do |column|

@@ -21,6 +21,7 @@ class DataListConverter
       puts "#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\t#{msg}"
     end
 
+    # register_converter(:item_data, :item_iterator){ |data, options| ... }
     def register_converter(from_type, to_type, &block)
       @route_map = nil # clear cache
       CONVERTERS[[from_type, to_type]] = block
