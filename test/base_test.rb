@@ -40,6 +40,12 @@ describe DataListConverter do
       string.string.must_equal ".4\n.8\n.12\n"
     end
 
+    it 'test data format exists' do
+      -> {
+        DataListConverter.convert(:item_data, :ppp, {a: 12})
+      }.must_raise Exception
+    end
+
   end
 
 end

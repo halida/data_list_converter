@@ -98,8 +98,6 @@ end
 
 ## Todo
 
-- check type exists
-- route not found, list all routes
 - register can bind method again
 - better API
 - better error message

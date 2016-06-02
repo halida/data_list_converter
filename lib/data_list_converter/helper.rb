@@ -23,6 +23,10 @@ class DataListConverter
     CONVERTERS.keys.flatten.uniq.sort
   end
 
+  def self.routes
+    CONVERTERS.keys
+  end
+
   def self.file_types
     matcher = /(.*)_file$/
     DataListConverter.types.select do |type|

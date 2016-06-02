@@ -91,7 +91,11 @@ class DataListConverter
     # If we want to convert between types, like: convert item_data into csv_file,
     # we need find all the intermidate data type, like: [:item_data, :item_iterator, :table_iterator, :csv_file]
     def find_route(from_type, to_type)
+      [from_type, to_type].each do |type|
+        raise Exception, "cannot find type: #{type}" unless self.types.include?(type)
+      end
       raise Exception, "from_type should not equal to to_type: #{from_type}" if from_type == to_type
+
       # map wide search
       checked = Set.new
       checking = Set.new([from_type])
@@ -124,7 +128,10 @@ class DataListConverter
           checking += Set.new(next_nodes) - checked
         end
       end
-      raise Exception, "Route not found: #{from_type} -> #{to_type}"
+
+      log = ["Route not found: #{from_type} -> #{to_type}", "Current routes:"]
+      log += self.routes.map{|from, to| "#{from} -> #{to}"}
+      raise Exception, log.join("\n")
     end
 
     # convert adjacency list into quick lookup hash
