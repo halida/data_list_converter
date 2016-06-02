@@ -8,6 +8,7 @@ Refactor.
 - 0.3.7 add marshal_file type, and load_from_file, save_to_file helper
 - 0.3.8 add raw type
 - 0.3.9 add unify_item_data_keys helper
+- 0.3.10 add flatten
 
 ## 0.2
 

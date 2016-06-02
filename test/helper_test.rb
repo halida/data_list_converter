@@ -70,4 +70,15 @@ describe DataListConverter do
     end
   end
 
+
+  describe :flatten do
+    specify do
+      data = {a: {b: 12}, c: {d: {e: 11}}}
+      @c.flatten(data).must_equal({:"a:b"=>12, :"c:d:e"=>11})
+
+      # change sep
+      data = {a: {b: 12}, c: {d: {e: 11}}}
+      @c.flatten(data, '_').must_equal({:"a_b"=>12, :"c_d_e"=>11})
+    end
+  end
 end

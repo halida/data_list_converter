@@ -46,4 +46,27 @@ class DataListConverter
       end
     end
   end
+
+  # flatten multi level item data into one level, example:
+  #   {a: {b: 12}, c: {d: {e: 11}}}
+  #   =>
+  #   {:"a:b"=>12, :"c:d:e"=>11}
+  def self.flatten(data, sep=':')
+    out = {}
+    recursive_flatten(out, data, nil, sep)
+    out
+  end
+
+  def self.recursive_flatten(out, data, header, sep)
+    data.each do |k, v|
+      k = header ? :"#{header}#{sep}#{k}" : k
+      case v
+      when Hash
+        recursive_flatten(out, v, k, sep)
+      else
+        out[k] = v
+      end
+    end
+  end
+
 end
