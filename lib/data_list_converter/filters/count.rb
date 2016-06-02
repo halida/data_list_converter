@@ -5,6 +5,7 @@ class DataListConverter
     msg_format = options[:msg] || "on %{count}"
     total_format = options[:total] || "total: %{total}"
     out = options[:out] || STDOUT
+
     total = 1
     lambda { |&block|
       proc.call do |item|

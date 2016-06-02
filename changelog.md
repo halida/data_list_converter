@@ -1,3 +1,7 @@
+## 0.4
+
+Add parameter check, type check, change record type API.
+
 ## 0.3
 
 Refactor.
