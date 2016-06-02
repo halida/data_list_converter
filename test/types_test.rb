@@ -99,5 +99,36 @@ describe DataListConverter do
       end
     end
   end
+
+  describe :records do
+    specify do
+      require 'sqlite3'
+      require 'active_record'
+
+      ActiveRecord::Base.establish_connection(
+        adapter: 'sqlite3',
+        database: ':memory:'
+      )
+
+      ActiveRecord::Schema.define do
+        create_table :users, force: true do |t|
+          t.string :name
+          t.integer :age
+        end
+      end
+
+      class User < ActiveRecord::Base; end
+      (1..10).each{ |i| User.create(name: "user-#{i}", age: i+20) }
+
+      query = User.where("age > 25 and age < 27")
+      columns = [:name, :age]
+      @c.convert(:records, :item_data, query: query, columns: columns).
+        must_equal([{name: "user-6", age: 26}])
+
+      display = [:n, :a]
+      @c.convert(:records, :item_data, query: query, columns: columns, display: display).
+        must_equal([{n: "user-6", a: 26}])
+    end
+  end
   
 end

@@ -98,5 +98,4 @@ end
 
 ## Todo
 
-- records testing
-- doc for helpers
+- doc for helpers, records
