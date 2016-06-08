@@ -79,6 +79,12 @@ describe DataListConverter do
       # change sep
       data = {a: {b: 12}, c: {d: {e: 11}}}
       @c.flatten(data, '_').must_equal({:"a_b"=>12, :"c_d_e"=>11})
+
+      # set max level
+      data = {a: {b: 12}, c: {d: {e: {f: 11}}}}
+      @c.flatten(data, ':', 1).must_equal({:"a:b"=>12, :"c:d"=>{e: {f: 11}}})
+      data = {a: {b: 12}, c: {d: {e: {f: 11}}}}
+      @c.flatten(data, ':', 2).must_equal({:"a:b"=>12, :"c:d:e"=>{f: 11}})
     end
   end
 end

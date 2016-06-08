@@ -71,7 +71,7 @@ Please see [test examples](https://github.com/halida/data_list_converter/blob/ma
 - **save_to_file**: Save data to file, it will use `get_file_format` to find proper file format.  `DataListConverter.save_to_file(filename, data, data_format=:item_data)`
 - **load_from_file**: Get data from file, it will use `get_file_format` to find proper file format. `DataListConverter.load_from_file(filename, data_format=:item_data)`
 - **unify_item_data_keys**: Sometimes in the `item_data` list, each data keys don't exactly same, so use this function to fix it, example: `DataListConverter.unify_item_data_keys([{a: 12}, {b: 11}]) == [{a: 12, b: nil}, {a: nil, b: 11}]`.
-- **flatten**: Flatten multi level item_data list into one level, example: `DataListConverter.flatten({a: {b: 12}, c: {d: {e: 11}}}) == {:"a:b"=>12, :"c:d:e"=>11}`, can change seperator: `DataListConverter.flatten(data, '_')`
+- **flatten**: Flatten multi level item_data list into one level, example: `DataListConverter.flatten({a: {b: 12}, c: {d: {e: 11}}}) == {:"a:b"=>12, :"c:d:e"=>11}`, can change seperator: `DataListConverter.flatten(data, '_')`, set max level: `DataListConverter.flatten(data, '_', 2)`
 
 ## Extend
 

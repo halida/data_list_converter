@@ -55,18 +55,17 @@ class DataListConverter
   #   {a: {b: 12}, c: {d: {e: 11}}}
   #   =>
   #   {:"a:b"=>12, :"c:d:e"=>11}
-  def self.flatten(data, sep=':')
+  def self.flatten(data, sep=':', max_level=nil)
     out = {}
-    recursive_flatten(out, data, nil, sep)
+    recursive_flatten(out, data, nil, sep, 1, max_level)
     out
   end
 
-  def self.recursive_flatten(out, data, header, sep)
+  def self.recursive_flatten(out, data, header, sep, level, max_level)
     data.each do |k, v|
       k = header ? :"#{header}#{sep}#{k}" : k
-      case v
-      when Hash
-        recursive_flatten(out, v, k, sep)
+      if v.kind_of?(Hash) and (!max_level or level <= max_level)
+        recursive_flatten(out, v, k, sep, level+1, max_level)
       else
         out[k] = v
       end
