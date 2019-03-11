@@ -3,6 +3,7 @@
 Add parameter check, type check, change record type API.
 
 - 0.4.1 add max_level to flatten helper
+- 0.4.2 fix value cannot save if value is symbol
 
 ## 0.3
 

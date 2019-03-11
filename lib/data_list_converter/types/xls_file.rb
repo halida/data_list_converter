@@ -19,6 +19,7 @@ class DataListConverter
     sheet = book.create_worksheet(name: (options[:sheet] || "Sheet1"))
     i = 0
     proc.call do |row|
+      row = row.map(&:to_s)
       sheet.row(i).push *row
       i += 1
     end
@@ -33,6 +34,7 @@ class DataListConverter
       sheet = book.create_worksheet(name: name.to_s)
       i = 0
       table_iterator.call do |row|
+        row = row.map(&:to_s)
         sheet.row(i).concat(row)
         i += 1
       end
