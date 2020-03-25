@@ -65,7 +65,7 @@ class DataListConverter
       self.log("methods: #{methods}")
       methods.inject(from_value) do |v, method|
         method, args = method
-        method.call(v, args)
+        method.call(v, args.update(options.slice(:width)))
       end
     end
 

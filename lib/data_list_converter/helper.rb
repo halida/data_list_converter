@@ -1,8 +1,9 @@
 class DataListConverter
-  def self.save_to_file(filename, data, data_format=:item_data)
+  def self.save_to_file(filename, data, data_format=:item_data, options = {})
     file_format = self.get_file_format(filename)
     DataListConverter.convert(data_format, file_format, data,
-                              file_format => {filename: filename})
+                              file_format => {filename: filename},
+                              :width => (options[:width] || nil))
   end
 
   def self.load_from_file(filename, data_format=:item_data)
