@@ -32,6 +32,9 @@ class DataListConverter
     book = Spreadsheet::Workbook.new
     data.each do |name, table_iterator|
       sheet = book.create_worksheet(name: name.to_s)
+      if options[:width].is_a? Array
+        options[:width].each_with_index {|w, i| sheet.column(i).width = w }
+      end
       i = 0
       table_iterator.call do |row|
         row = row.map(&:to_s)
