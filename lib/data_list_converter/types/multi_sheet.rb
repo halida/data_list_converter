@@ -19,8 +19,9 @@ class DataListConverter
       :"multi_sheet_#{from_type}",
       :"multi_sheet_#{to_type}",
     ) do |data, options|
+      self.log("multi_sheet #{from_type} -> #{to_type} with options: #{options}")
       data.map do |sheet, from_data|
-        to_data = self.convert(from_type, to_type, from_data)
+        to_data = self.convert(from_type, to_type, from_data, options)
         [sheet, to_data]
       end.to_h
     end

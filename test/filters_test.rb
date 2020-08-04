@@ -26,11 +26,29 @@ describe DataListConverter do
       string = StringIO.new
       filter = {count: {size: 4000,
                         out: string,
-                        msg: "%{percent}%"}}
+                        msg: "%{percent}%%"}}
       result = DataListConverter.convert(
         :item_iterator, :table_data, iter,
         item_iterator: {filter: filter})
       string.string.split("\n").must_equal ['total: 10000', '40.0%', '80.0%']
+    end
+  end
+
+  describe :remove_debug do
+    specify do
+      filter = {remove_debug: true}
+      item_data = [{name: "james", debug: "", a: 12}] * 2
+      result = DataListConverter.convert(
+        :item_data, :table_data, item_data,
+        table_iterator: {filter: filter})
+      result.must_equal [["name"], ["james"], ["james"]]
+
+      # check on multi_sheet
+      item_data = {a: [{name: "james", debug: "", a: 12}] * 2, b: [{name: 'cc', debug: "", b: 3}]*3}
+      result = DataListConverter.convert(
+        :multi_sheet_item_data, :multi_sheet_table_data, item_data,
+        multi_sheet_table_iterator: {table_iterator: {filter: {remove_debug: true}}})
+      result.must_equal(a: [["name"], ["james"], ["james"]], b: [["name"], ["cc"], ["cc"], ["cc"]])
     end
   end
   

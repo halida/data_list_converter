@@ -45,7 +45,7 @@ class DataListConverter
     def convert(from_type, to_type, from_value, options={})
       methods = []
       add_filter = lambda { |type|
-        filters = (options[type] || {}).delete(:filter)
+        filters = (options[type] || {})[:filter]
         return unless filters
         methods += normalize_filters(type, filters)
       }
@@ -58,6 +58,7 @@ class DataListConverter
         from_type, to_type = route[i], route[i+1]
         method = CONVERTERS[[from_type, to_type]]
         raise "cannot find converter #{from_type} -> #{to_type}" unless method
+        self.log "#{from_type} -> #{to_type} options: #{options[to_type]}"
         methods.push([method, options[to_type] || {}])
         add_filter.call(to_type)
       end
