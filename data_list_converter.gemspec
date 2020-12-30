@@ -19,6 +19,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'pry', '~> 0.10.1'
   s.add_development_dependency 'sqlite3', '~> 1.3'
   s.add_development_dependency 'activerecord', '~> 4.2'
+  s.add_development_dependency 'xlsxtream'
+  s.add_development_dependency 'creek'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
