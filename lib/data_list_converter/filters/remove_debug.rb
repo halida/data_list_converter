@@ -6,9 +6,14 @@ class DataListConverter
       proc.call do |row|
         unless columns
           columns = row
-          debug_index = columns.index('debug')
+          debug_index = columns.index('debug') || columns.index('Debug')
         end
-        block.call(row[0..(debug_index-1)])
+
+        if debug_index != nil
+          block.call(row[0..(debug_index-1)])
+        else
+          block.call(row)
+        end
       end
     }
   end
