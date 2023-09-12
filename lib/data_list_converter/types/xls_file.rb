@@ -15,11 +15,13 @@ class DataListConverter
   end
 
   self.register_converter(:table_iterator, :xls_file) do |proc, options|
+    type = options[:type]
     book = Spreadsheet::Workbook.new
     sheet = book.create_worksheet(name: (options[:sheet] || "Sheet1"))
+
     i = 0
     proc.call do |row|
-      row = row.map(&:to_s)
+      row = row.map(&:to_s) unless type == :raw
       sheet.row(i).push *row
       i += 1
     end
@@ -29,12 +31,13 @@ class DataListConverter
   end
 
   self.register_converter(:multi_sheet_table_iterator, :xls_file) do |data, options|
+    type = options[:type]
     book = Spreadsheet::Workbook.new
     data.each do |name, table_iterator|
       sheet = book.create_worksheet(name: name.to_s)
       i = 0
       table_iterator.call do |row|
-        row = row.map(&:to_s)
+        row = row.map(&:to_s) unless type == :raw
         sheet.row(i).concat(row)
         i += 1
       end
@@ -49,7 +52,7 @@ class DataListConverter
     book = Spreadsheet.open(filename)
     book.worksheets.map do |sheet|
       iterator = lambda { |&block|
-        sheet.each do |row| 
+        sheet.each do |row|
           block.call(row.to_a)
         end
       }
