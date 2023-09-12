@@ -1,6 +1,7 @@
 require 'data_list_converter/types/csv_file'
 require 'data_list_converter/types/xls_file'
 require 'data_list_converter/types/xlsx_file'
+require 'data_list_converter/types/fast_xlsx_file'
 require 'data_list_converter/types/marshal'
 
 describe DataListConverter do
@@ -48,14 +49,26 @@ describe DataListConverter do
   describe :load_and_save_to_file do
     specify do
       filename = 'result.csv'
+      data = [{a: '12', b: '3'}, {a: '1', b: '4'}]
+      table_data = [['a', 'b'], ['a1', 'b1']]
+
       begin
-        data = [{a: '12', b: '3'}, {a: '1', b: '4'}]
         @c.save_to_file(filename, data)
         @c.load_from_file(filename).must_equal(data)
 
-        table_data = [['a', 'b'], ['a1', 'b1']]
         @c.save_to_file(filename, table_data, :table_data)
         @c.load_from_file(filename, :table_data).must_equal(table_data)
+      ensure
+        FileUtils.rm_rf(filename)
+      end
+
+      filename = "result.xlsx"
+      begin
+        @c.save_to_file(filename, data, :item_data, file_format: :fast_xlsx_file)
+        @c.load_from_file(filename, :item_data, file_format: :fast_xlsx_file).must_equal(data)
+
+        @c.save_to_file(filename, table_data, :table_data, file_format: :fast_xlsx_file)
+        @c.load_from_file(filename, :table_data, file_format: :fast_xlsx_file).must_equal(table_data)
       ensure
         FileUtils.rm_rf(filename)
       end

@@ -80,16 +80,16 @@ describe DataListConverter do
     end
   end
 
-  describe :xlsx_file do
+  describe :fast_xlsx_file do
     specify do
       filename = 'test.xlsx'
       begin
-        @c.convert(:item_data, :xlsx_file, ITEM_DATA, xlsx_file: {filename: filename})
-        @c.convert(:xlsx_file, :item_data, {filename: filename}).must_equal ITEM_DATA
+        @c.convert(:item_data, :fast_xlsx_file, ITEM_DATA, fast_xlsx_file: {filename: filename})
+        @c.convert(:fast_xlsx_file, :item_data, {filename: filename}).must_equal ITEM_DATA
 
-        @c.convert(:multi_sheet_table_data, :xlsx_file, MULTI_SHEET_TABLE_DATA,
-                   xlsx_file: {filename: filename})
-        @c.convert(:xlsx_file, :multi_sheet_table_data,
+        @c.convert(:multi_sheet_table_data, :fast_xlsx_file, MULTI_SHEET_TABLE_DATA,
+                   fast_xlsx_file: {filename: filename})
+        @c.convert(:fast_xlsx_file, :multi_sheet_table_data,
                    {filename: filename},
                   ).must_equal(MULTI_SHEET_TABLE_DATA)
       ensure
