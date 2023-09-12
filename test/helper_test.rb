@@ -19,7 +19,7 @@ describe DataListConverter do
          :multi_sheet_item_iterator,
          :multi_sheet_table_iterator,
          :marshal_file,
-         :csv_file, :csv_raw, :xls_file, :xlsx_file,
+         :csv_file, :csv_raw, :fast_xlsx_file, :xls_file, :xlsx_file,
          :records, :raw,
         ].sort
       )
@@ -30,7 +30,7 @@ describe DataListConverter do
     specify do
       @c.file_types.must_equal(
         [
-          :csv_file, :xlsx_file, :xls_file, :marshal_file
+          :csv_file, :fast_xlsx_file, :xlsx_file, :xls_file, :marshal_file
         ].sort
       )
     end

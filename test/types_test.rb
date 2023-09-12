@@ -1,6 +1,7 @@
 require 'data_list_converter/types/csv_file'
 require 'data_list_converter/types/xls_file'
 require 'data_list_converter/types/xlsx_file'
+require 'data_list_converter/types/fast_xlsx_file'
 require 'data_list_converter/types/marshal'
 
 describe DataListConverter do
@@ -78,8 +79,6 @@ describe DataListConverter do
       end
     end
   end
-
-  require 'data_list_converter/types/fast_xlsx_file'
 
   describe :xlsx_file do
     specify do
