@@ -17,13 +17,15 @@ class DataListConverter
   end
 
   self.register_converter(:table_iterator, :xlsx_file) do |proc, options|
+    type = options[:type]
     book = RubyXL::Workbook.new
     sheet = book.worksheets[0]
     sheet.sheet_name = options[:sheet] if options[:sheet]
     i = 0
     proc.call do |row|
       row.each_with_index do |v, j|
-        sheet.add_cell(i, j, v.to_s)
+        v = v.to_s unless type == :raw
+        sheet.add_cell(i, j, v)
       end
       i += 1
     end
@@ -33,6 +35,7 @@ class DataListConverter
   end
 
   self.register_converter(:multi_sheet_table_iterator, :xlsx_file) do |data, options|
+    type = options[:type]
     book = RubyXL::Workbook.new
     book.worksheets.pop
     data.each do |name, table_iterator|
@@ -49,7 +52,8 @@ class DataListConverter
             end
             cell.change_fill(v[:fill_color]) if v[:fill_color]
           else
-            cell = sheet.add_cell(i, j, v.to_s)
+            v = v.to_s unless type == :raw
+            cell = sheet.add_cell(i, j, v)
           end
 
         end
