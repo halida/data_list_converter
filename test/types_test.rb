@@ -64,6 +64,49 @@ describe DataListConverter do
       end
     end
 
+    it 'option :sheet sets the worksheet name' do
+      filename = 'test.xlsx'
+      begin
+        @c.convert(:table_data, :xlsx_file, TABLE_DATA,
+                   xlsx_file: {filename: filename, sheet: 'my_sheet'})
+        book = RubyXL::Parser.parse(filename)
+        book.worksheets[0].sheet_name.must_equal('my_sheet')
+      ensure
+        FileUtils.rm_f(filename)
+      end
+    end
+
+    it 'option :type => :raw keeps original value types' do
+      filename = 'test.xlsx'
+      begin
+        table_data = [['a', 'b'], [1, 2]]
+        @c.convert(:table_data, :xlsx_file, table_data,
+                   xlsx_file: {filename: filename, type: :raw})
+        @c.convert(:xlsx_file, :table_data, {filename: filename}).
+          must_equal(table_data)
+      ensure
+        FileUtils.rm_f(filename)
+      end
+    end
+
+    it 'option :fill_color changes cell fill color' do
+      filename = 'test.xlsx'
+      begin
+        data = {
+          a: [['name'],
+              [{text: 'aaa', fill_color: '880000'}],
+             ],
+        }
+        @c.convert(:multi_sheet_table_data, :xlsx_file, data,
+                   xlsx_file: {filename: filename})
+        book = RubyXL::Parser.parse(filename)
+        cell = book.worksheets[0][1][0]
+        cell.fill_color.must_equal('880000')
+      ensure
+        FileUtils.rm_f(filename)
+      end
+    end
+
     it 'custom cell format' do
       begin
         data = {
@@ -150,5 +193,5 @@ describe DataListConverter do
         must_equal([{n: "user-6", a: 26}])
     end
   end
-  
+
 end

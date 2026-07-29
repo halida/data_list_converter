@@ -46,9 +46,10 @@ class DataListConverter
           if v.kind_of?(Hash)
             # custom cell format
             cell = sheet.add_cell(i, j, v[:text].to_s)
-            v.each do |k, v|
+            v.each do |k, value|
               next if k == :text
-              cell.send(k, v)
+              next if k == :fill_color
+              cell.send(k, value)
             end
             cell.change_fill(v[:fill_color]) if v[:fill_color]
           else
