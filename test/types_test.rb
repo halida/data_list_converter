@@ -89,6 +89,21 @@ describe DataListConverter do
       end
     end
 
+    it 'option :type => :raw saves Date as a real date cell' do
+      filename = 'test.xlsx'
+      begin
+        date = Date.today
+        @c.convert(:table_data, :xlsx_file, [['date'], [date]],
+                   xlsx_file: {filename: filename, type: :raw})
+        book = RubyXL::Parser.parse(filename)
+        cell = book.worksheets[0][1][0]
+        cell.value.wont_be_nil
+        cell.value.to_date.must_equal(date)
+      ensure
+        FileUtils.rm_f(filename)
+      end
+    end
+
     it 'option :fill_color changes cell fill color' do
       filename = 'test.xlsx'
       begin

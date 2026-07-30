@@ -1,7 +1,31 @@
 # xlsx_file only works when installed rubyXL gem
 require 'rubyXL'
+require 'date'
 
 class DataListConverter
+
+  # Excel stores dates as serial numbers with a date number format.
+  # Writing a raw Date/DateTime/Time object produces an empty cell,
+  # so set a number format and let change_contents convert the value.
+  def self.xlsx_add_raw_cell(sheet, book, i, j, v)
+    case v
+    when Time
+      cell = sheet.add_cell(i, j)
+      cell.set_number_format('yyyy-mm-dd hh:mm:ss')
+      cell.change_contents(v.to_datetime)
+    when DateTime
+      cell = sheet.add_cell(i, j)
+      cell.set_number_format('yyyy-mm-dd hh:mm:ss')
+      cell.change_contents(v)
+    when Date
+      cell = sheet.add_cell(i, j)
+      cell.set_number_format('yyyy-mm-dd')
+      cell.change_contents(v)
+    else
+      cell = sheet.add_cell(i, j, v)
+    end
+    cell
+  end
 
   self.register_converter(:xlsx_file, :table_iterator) do |input, options|
     lambda { |&block|
@@ -24,8 +48,11 @@ class DataListConverter
     i = 0
     proc.call do |row|
       row.each_with_index do |v, j|
-        v = v.to_s unless type == :raw
-        sheet.add_cell(i, j, v)
+        if type == :raw
+          self.xlsx_add_raw_cell(sheet, book, i, j, v)
+        else
+          sheet.add_cell(i, j, v.to_s)
+        end
       end
       i += 1
     end
@@ -53,8 +80,11 @@ class DataListConverter
             end
             cell.change_fill(v[:fill_color]) if v[:fill_color]
           else
-            v = v.to_s unless type == :raw
-            cell = sheet.add_cell(i, j, v)
+            if type == :raw
+              cell = self.xlsx_add_raw_cell(sheet, book, i, j, v)
+            else
+              cell = sheet.add_cell(i, j, v.to_s)
+            end
           end
 
         end
